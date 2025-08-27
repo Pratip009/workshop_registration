@@ -10,7 +10,10 @@ dotenv.config();
 const app = express();
 
 // Debug: check if Stripe key is loaded
-console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY ? "✅ Loaded" : "❌ Missing");
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.error("❌ Missing Stripe Secret Key");
+  process.exit(1);
+}
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);

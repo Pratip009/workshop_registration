@@ -26,7 +26,9 @@ function App() {
     try {
       // Call your backend to create checkout session
       const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/api/workshops/create-checkout-session`,
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/workshops/create-checkout-session`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
