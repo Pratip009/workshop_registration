@@ -3,21 +3,19 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bodyParser from "body-parser";
 import workshopRoutes from "./routes/workshopRoutes.js";
+import Stripe from "stripe";
 
 dotenv.config();
 
 const app = express();
 
 // Debug: check if Stripe key is loaded
-console.log(
-  "Stripe Secret Key:",
-  process.env.STRIPE_SECRET_KEY ? "✅ Loaded" : "❌ Missing"
-);
+console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY ? "✅ Loaded" : "❌ Missing");
 
-// Webhook route must be before express.json()
-import Stripe from "stripe";
+// Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// Webhook route must be before express.json()
 app.post(
   "/api/webhook",
   bodyParser.raw({ type: "application/json" }),

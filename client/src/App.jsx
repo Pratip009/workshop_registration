@@ -1,63 +1,68 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 function App() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    mobile: '',
-    workshop: '',
+    name: "",
+    email: "",
+    mobile: "",
+    workshop: "",
   });
-  const [paymentLink, setPaymentLink] = useState({ url: '', text: '' });
-  const [paymentClicked, setPaymentClicked] = useState(false); // track payment click
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-
-    if (name === 'workshop') {
-      if (value === 'phone_repair') {
-        setPaymentLink({
-          url: 'https://buy.stripe.com/3cIcN6aLS0dggO076S6wE0K',
-          text: 'Pay for Phone Repair Workshop',
-        });
-        setPaymentClicked(false);
-      } else if (value === 'beauty_101') {
-        setPaymentLink({
-          url: 'https://buy.stripe.com/8x29AUdY4e4655i2QC6wE0L',
-          text: 'Pay for Beauty 101 Workshop',
-        });
-        setPaymentClicked(false);
-      } else {
-        setPaymentLink({ url: '', text: '' });
-        setPaymentClicked(false);
-      }
-    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (!formData.workshop) {
-      e.preventDefault();
-      alert('Please select a workshop.');
+      alert("Please select a workshop.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Call your backend to create checkout session
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/api/workshops/create-checkout-session`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        alert("Error creating checkout session.");
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error. Try again later.");
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Workshop Registration</h2>
-        <form
-          id="registrationForm"
-          action="https://formsubmit.co/your-email@example.com"
-          method="POST"
-          onSubmit={handleSubmit}
-        >
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Workshop Registration
+        </h2>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700">
               Name
             </label>
             <input
               type="text"
-              id="name"
               name="name"
               value={formData.name}
               onChange={handleInputChange}
@@ -66,12 +71,11 @@ function App() {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700">
               Email
             </label>
             <input
               type="email"
-              id="email"
               name="email"
               value={formData.email}
               onChange={handleInputChange}
@@ -80,12 +84,11 @@ function App() {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="mobile" className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700">
               Mobile Number
             </label>
             <input
               type="tel"
-              id="mobile"
               name="mobile"
               value={formData.mobile}
               onChange={handleInputChange}
@@ -94,11 +97,10 @@ function App() {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="workshop" className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700">
               Workshop Interested In
             </label>
             <select
-              id="workshop"
               name="workshop"
               value={formData.workshop}
               onChange={handleInputChange}
@@ -110,28 +112,14 @@ function App() {
               <option value="beauty_101">Beauty 101</option>
             </select>
           </div>
-          {paymentLink.url && (
-            <div className="mb-4">
-              <p className="text-sm text-gray-700">Please complete the payment via Stripe to proceed:</p>
-              <a
-                href={paymentLink.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setPaymentClicked(true)} // mark payment link clicked
-                className="text-blue-600 font-semibold hover:underline"
-              >
-                {paymentLink.text}
-              </a>
-            </div>
-          )}
-          {paymentClicked && (
-            <button
-              type="submit"
-              className="w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              Submit
-            </button>
-          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            {loading ? "Redirecting to payment..." : "Proceed to Payment"}
+          </button>
         </form>
       </div>
     </div>
