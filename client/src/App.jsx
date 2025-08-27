@@ -110,8 +110,8 @@ function App() {
               className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a workshop</option>
-              <option value="phone_repair">Phone Repair</option>
-              <option value="beauty_101">Beauty 101</option>
+              <option value="phone_repair">iPhone/Android Repair Workshop</option>
+              <option value="beauty_101">Makeup Workshop</option>
             </select>
           </div>
 
